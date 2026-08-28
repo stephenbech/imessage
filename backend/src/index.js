@@ -7,6 +7,8 @@ import path from "path";
 import job from "./lib/cron.js";
 import { connectDB } from "./lib/db.js";
 import clerkWebhook from "./webhooks/clerk.webhook.js";
+import authRoutes   from "./routes/auth.route.js"
+
 const app = express();
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
@@ -26,6 +28,8 @@ app.use(clerkMiddleware());
 app.get("/health", (req, res) => {
       res.status(200).json({ ok: true });
 });
+
+app.use("/api/auth", authRoutes);
 
 // THIS IS FOR SERVING THE FRONTEND IN PRODUCTION
 if (fs.existsSync(publicDir)) {
