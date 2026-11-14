@@ -5,12 +5,13 @@ import { ThemeProvider } from './context/ThemeContext';
 import { WallpaperProvider } from './context/WallpaperContext';
 import AuthPage from './pages/AuthPage';
 import ChatPage from './pages/ChatPage';
+import PageLoader from './components/PageLoader';
 
 function App () {
 
   const { isSignedIn, isLoaded } = useAuth();
 
-if(!isLoaded) return <p>loading...</p>;
+if(!isLoaded) return <PageLoader/>;
   return (
     <ThemeProvider>
       <WallpaperProvider>
