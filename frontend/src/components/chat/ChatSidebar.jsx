@@ -1,14 +1,14 @@
+import { UserButton } from "@clerk/react";
 import { getInitials, useSelectedConversation } from "../../hooks/useSelectedConversation";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useChatStore } from "../../store/useChatStore";
 import { APP_NAME, AppLogo } from "../AppLogo";
-import { UserButton } from "@clerk/react";
 
 import { SearchField, Tabs } from "@heroui/react";
 import { MessageSquareIcon, UsersIcon } from "lucide-react";
 import { ConversationRow } from "./ConversationRow";
 
-function mapUserForList(user, onlineUsers) {
+function mapUserForList (user, onlineUsers) {
   return {
     conversationId: user._id,
     id: user._id,
@@ -25,11 +25,11 @@ function mapUserForList(user, onlineUsers) {
   };
 }
 
-function ChatSidebar() {
-  const conversations = useChatStore((state) => state.conversations);
-
-  console.log(conversations);
-  const users = useChatStore((state) => state.users);
+function ChatSidebar () {
+  const conversations = useChatStore((state) =>
+    Array.isArray(state.conversations) ? state.conversations : [],
+  );
+  const users = useChatStore((state) => (Array.isArray(state.users) ? state.users : []));
 
   const searchQuery = useChatStore((state) => state.searchQuery);
   const setSearchQuery = useChatStore((state) => state.setSearchQuery);
@@ -50,8 +50,8 @@ function ChatSidebar() {
 
   const filteredConversations = normalizedSearchQuery
     ? conversationUsers.filter((conversation) =>
-        conversation.peer.name.toLowerCase().includes(normalizedSearchQuery),
-      )
+      conversation.peer.name.toLowerCase().includes(normalizedSearchQuery),
+    )
     : conversationUsers;
 
   const filteredUsers = normalizedSearchQuery
@@ -60,9 +60,8 @@ function ChatSidebar() {
 
   return (
     <aside
-      className={`w-full shrink-0 flex-col overflow-hidden border-r border-border lg:w-72 ${
-        !isLargeScreen && activeConversationId ? "hidden lg:flex" : "flex"
-      }`}
+      className={`w-full shrink-0 flex-col overflow-hidden border-r border-border lg:w-72 ${!isLargeScreen && activeConversationId ? "hidden lg:flex" : "flex"
+        }`}
     >
       <div className="shrink-0 border-b border-border px-2 pb-2 pt-2.5 sm:px-3 sm:pt-3">
         <div className="flex items-center gap-2 px-0.5 sm:gap-2.5 sm:px-1">
