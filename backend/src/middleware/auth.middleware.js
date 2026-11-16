@@ -16,12 +16,14 @@ export async function protectRoute(req, res, next) {
             // Clerk rather than making every protected endpoint fail until then.
             if (!user) {
                   const clerkUser = await clerkClient.users.getUser(userId);
-                  const email =
+                  const primaryEmail =
                         clerkUser.emailAddresses.find(
                               ({ id }) =>
                                     id === clerkUser.primaryEmailAddressId,
-                        )?.emailAddress ??
-                        clerkUser.emailAddresses[0]?.emailAddress;
+                        ) ?? clerkUser.emailAddresses[0];
+                  const email = primaryEmail?.emailAddress;
+                  const emailIsVerified =
+                        primaryEmail?.verification?.status === "verified";
 
                   if (!email) {
                         return res.status(422).json({
@@ -48,15 +50,32 @@ export async function protectRoute(req, res, next) {
                                     $setOnInsert: { clerkId: userId },
                               },
                               {
-                                    new: true,
+                                    returnDocument: "after",
                                     upsert: true,
                                     setDefaultsOnInsert: true,
                               },
                         );
                   } catch (error) {
-                        // A concurrent request may have created the same profile first.
+                        // A concurrent request may have created the same profile first,
+                        // or an older profile may already own this verified email.
                         if (error.code !== 11000) throw error;
                         user = await User.findOne({ clerkId: userId });
+
+                        if (!user && emailIsVerified) {
+                              user = await User.findOneAndUpdate(
+                                    { email },
+                                    {
+                                          $set: {
+                                                clerkId: userId,
+                                                fullName,
+                                                profilePic:
+                                                      clerkUser.imageUrl || "",
+                                          },
+                                    },
+                                    { returnDocument: "after" },
+                              );
+                        }
+
                         if (!user) throw error;
                   }
             }
